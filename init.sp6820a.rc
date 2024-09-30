@@ -1,0 +1,24 @@
+on init-common
+    loglevel 3
+    symlink /system/sps/init/init.sp6820a.3rdparty.rc /init.sp6820a.3rdparty.rc
+on boot
+    # This is a high density device with more memory, so larger vm heaps for it.
+    setprop dalvik.vm.heapsize 24m
+
+    setprop ro.recvkeys 115,114,116,212
+    setprop ro.recvkey.up       115
+    setprop ro.recvkey.down     114
+    setprop ro.recvkey.enter    116
+    setprop ro.recvkey.home     212
+    setprop ro.recvkey.power    116
+
+    setprop ro.gpu mali
+
+on boot
+    write /proc/sys/kernel/panic 2
+    write /proc/sys/kernel/panic_on_oops 1
+    write /proc/sys/kernel/softlockup_panic 1
+    write /proc/sys/kernel/hung_task_panic 1
+    write /proc/sys/vm/panic_on_oom 1
+    write /sys/module/softdog/parameters/soft_margin 30
+    write /proc/sys/kernel/softlockup_thresh 20

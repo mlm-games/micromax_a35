@@ -1,0 +1,72 @@
+on early-init
+    device  /dev/ts0710mux*         660     radio   radio
+    device  /dev/ppp                660     radio   vpn
+    device  /dev/tun                640     vpn     vpn
+    device  /dev/sc8800g_2d         660     system  graphics
+    device  /dev/sc8800g_scale      660     system  graphics
+    device  /dev/sc8800g_rotation   660     system  graphics
+    device  /dev/sc8800g_dcam       660     system  graphics
+    device  /dev/video0             660     system  graphics
+    device  /dev/sc8800g_vsp        660     system  audio
+    device  /dev/ecompass_ctrl      666     system  compass
+    device  /dev/mxc622x            666     system  input
+    device  /dev/mmc31xx            666     system  compass
+    device  /dev/gpio               666     system  system
+    device  /dev/watchdog           666     system  system
+    device  /dev/vbpipe5            666     system  system
+
+on init-common
+
+sysclktz 0
+
+loglevel 3
+
+# setup the global environment
+	export PATH /sbin:/system/sbin:/system/bin:/system/xbin:/system/busybox:/data/busybox/_install/bin:/data/busybox/_install/sbin:/data/busybox/_install/usr/bin:/data/busybox/_install/usr/sbin
+    export ANDROID_ROOT /system
+    export ANDROID_DATA /data
+    export EXTERNAL_STORAGE /sdcard
+
+    symlink /system/etc /etc
+    symlink /system/opl /opl
+    symlink /system/etc/firmware /etc/firmware
+
+    mkdir /sdcard
+    mkdir /system
+    mkdir /data
+    mkdir /cache
+    mkdir /fixnv
+    mkdir /backupfixnv
+    mkdir /runtimenv
+    mkdir /productinfo
+    mount /tmp /tmp tmpfs
+
+on boot
+# basic network init
+    ifup lo
+    hostname localhost
+    domainname localdomain
+
+    class_start default
+
+## Daemon processes to be run by init.
+##
+service console /system/bin/sh
+    console
+
+service recovery /sbin/recovery
+
+# adbd is controlled by the persist.service.adb.enable system property
+service adbd /sbin/adbd
+    disabled
+
+# adbd on at boot in emulator
+on property:ro.kernel.qemu=1
+    start adbd
+
+on property:persist.service.adb.enable=1
+    start adbd
+
+on property:persist.service.adb.enable=0
+    stop adbd
+
